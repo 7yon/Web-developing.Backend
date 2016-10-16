@@ -64,7 +64,6 @@ class Model{
 		if (array_key_exists($id, $data)){
 			unset($data[$id]);
 		}
-
 		return file_put_contents($this->dataFileName, json_encode($data));
 	}
 }
