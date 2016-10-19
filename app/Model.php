@@ -10,27 +10,6 @@ class Model{
 		// должно получиться примерно /data/modelname.json
 		$this->dataFileName=DATA_FOLDER.DS.$modelName.'.json';
 	}
-	
-	// общие методы для всех моделей
-
-	public function load($id=false){
-		// считаем файл
-		$data=file_get_contents($this->dataFileName);
-		// декодируем 
-		$data=json_decode($data);
-
-		// если id не передан - то возвращаем все записи, иначе только нужную
-		if($id===false){
-			return $data;
-		}
-		else{
-			if(array_key_exists($id, $data)){
-				return $data[$id];	
-			}	
-		}
-		return false;
-	}
-
 
 	public function create(array $item){
 		// считываем нашу "базу данных"
@@ -43,17 +22,39 @@ class Model{
 		return file_put_contents($this->dataFileName, json_encode($data));
 	}
 
+	public function load($id=false){
+		// считаем файл
+		$data=file_get_contents($this->dataFileName);
+		// декодируем 
+		$data=json_decode($data, true);
+
+		// если id не передан - то возвращаем все записи, иначе только нужную
+		if($id===false){
+			return $data;
+		}
+		else{
+			foreach ($data as $value) {
+				if ($value['id'] == $id){
+					return $value;
+				}
+			}
+		}
+		return false;
+	}
 
 	public function save(array $newItem, $id){
 
 		$data=file_get_contents($this->dataFileName);
 		// декодируем
 		$data=json_decode($data, true);
-		$data[$id] = $newItem;
-		
+
+		foreach ($data as $key => $value) {
+				if ($value['id'] == $id){
+					$value = $newItem;
+				}
+		}		
 		return file_put_contents($this->dataFileName, json_encode($data));
 	}
-
 
 	public function delete($id){
 
@@ -61,8 +62,10 @@ class Model{
 		// декодируем 
 		$data=json_decode($data, true);
 
-		if (array_key_exists($id, $data)){
-			unset($data[$id]);
+		foreach ($data as $key => $value) {
+				if ($value['id'] == $id){
+					unset($data[$key]);
+				}
 		}
 		return file_put_contents($this->dataFileName, json_encode($data));
 	}
